@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>QuéAhora? · Prototipo React</title>
+<style>
+:root{--teal:#177e89;--coral:#ff795e;--cream:#f8f6f0;--ink:#243247;--card:#fff;--line:#e0e4e6;--muted:#687681;--chip:#e1f3f0;--chipink:#12636b;--page:#e9edf0;--frame:#283342;--star:#e0ae37}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--cream:#172029;--ink:#e8edf0;--card:#222d38;--line:#33414d;--muted:#9aa8b2;--chip:#1e3b40;--chipink:#8fd3da;--page:#0e1419;--frame:#3a4856;--star:#f0c45a}}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--page);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);display:flex;justify-content:center;align-items:center;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+#root{width:100%;display:flex;justify-content:center}
+.phone{width:360px;max-width:100%;height:min(740px,100vh);background:var(--cream);border:8px solid var(--frame);border-radius:32px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 8px 24px #0003}
+@media (max-width:420px){.phone{border:0;border-radius:0;height:100vh;width:100%}}
+.top{background:var(--teal);color:#fff;padding:20px 18px 18px;flex:none}
+.top h2{margin:2px 0 0;font-size:22px}.top small{opacity:.9}
+.top button{background:none;border:0;color:#fff;font:inherit;padding:0;cursor:pointer}
+.content{padding:16px 18px 20px;overflow-y:auto;flex:1}
+.nav{flex:none;height:62px;background:var(--card);border-top:1px solid var(--line);display:flex}
+.nav button{flex:1;background:none;border:0;color:var(--muted);font-size:11px;cursor:pointer;line-height:1.3}
+.nav button.on{color:var(--teal);font-weight:700}
+.nav i{display:block;font-style:normal;font-size:18px}
+.search{width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px;font:inherit;color:var(--ink);margin:6px 0 4px}
+.section{font-weight:750;margin:18px 0 10px}
+.row{display:flex;gap:10px}
+.book{background:var(--card);border-radius:14px;padding:10px;box-shadow:0 2px 5px #0001;flex:1;border:0;text-align:left;color:inherit;font:inherit;cursor:pointer}
+.cover{height:125px;border-radius:8px;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;font:700 14px Georgia,serif}
+.c0{background:linear-gradient(145deg,#316e83,#1f3548)}.c1{background:linear-gradient(140deg,#d68a64,#804956)}.c2{background:linear-gradient(140deg,#6e8c68,#314f45)}.c3{background:linear-gradient(140deg,#8a6fa8,#43315e)}.c4{background:linear-gradient(140deg,#c9a24b,#7a5a1e)}
+.book b{display:block;font-size:12px;margin-top:8px}
+.muted{color:var(--muted);font-size:12px}
+.chip{display:inline-block;background:var(--chip);color:var(--chipink);border-radius:20px;padding:7px 11px;font-size:12px;font-weight:650;margin:3px 4px 3px 0;border:0;cursor:pointer;font-family:inherit}
+.chip.active{background:var(--teal);color:#fff}
+.btn{background:var(--coral);border:0;color:#2c2630;padding:13px 16px;border-radius:12px;font:750 15px inherit;display:block;width:100%;margin-top:14px;cursor:pointer}
+.btn:disabled{opacity:.5;cursor:default}
+.listbook{display:flex;gap:12px;background:var(--card);border-radius:14px;padding:10px;margin:10px 0;align-items:center}
+.mini{width:54px;height:75px;flex:none;border-radius:5px;color:#fff;display:grid;place-items:center;text-align:center;font:11px Georgia;padding:5px}
+.stat{background:var(--card);border-radius:14px;padding:14px;flex:1;text-align:center}
+.stat strong{font-size:22px;color:var(--teal);display:block}
+.review{background:var(--card);border-radius:12px;padding:12px;margin:10px 0}
+.note{font-size:12px;color:var(--muted);line-height:1.5}
+.label{font-size:12px;font-weight:700;margin:15px 0 4px}
+.field{width:100%;background:var(--card);border:1px solid var(--line);padding:12px;border-radius:11px;font:13px inherit;color:var(--ink)}
+.stars button{background:none;border:0;font-size:30px;color:var(--line);cursor:pointer;padding:0 2px}
+.stars button.on{color:var(--star)}
+.item{display:flex;justify-content:space-between;width:100%;background:var(--card);border:1px solid var(--line);padding:12px;border-radius:11px;margin:9px 0;font:13px inherit;color:var(--ink);cursor:pointer}
+.toast{position:absolute;left:18px;right:18px;bottom:76px;background:var(--ink);color:var(--cream);padding:12px 14px;border-radius:12px;font-size:13px;text-align:center}
+:focus-visible{outline:3px solid var(--coral);outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script type="text/babel">
+const {useState,useEffect,useMemo}=React;
+const BOOKS=[
+ {id:1,t:"El jardín de la niebla",a:"Autor ficticio",r:4.5,p:320,g:"Novela",isbn:"9780000000011",c:0},
+ {id:2,t:"La última puerta",a:"Autora ficticia",r:4.2,p:288,g:"Misterio",isbn:"9780000000028",c:1},
+ {id:3,t:"El mapa perdido",a:"Autor ficticio",r:4.0,p:354,g:"Aventura",isbn:"9780000000035",c:2},
+ {id:4,t:"Cartas a la marea",a:"Autora ficticia",r:3.9,p:210,g:"Narrativa",isbn:"9780000000042",c:3},
+ {id:5,t:"Los relojes de Palermo",a:"Autor ficticio",r:4.3,p:402,g:"Histórica",isbn:"9780000000059",c:4}];
+const SEED_REV={1:[["Lector A",5,"Una historia que me atrapó desde el comienzo. La ambientación es excelente."],["Lector B",4,"Personajes interesantes y un final muy logrado."]]};
+const ST=["Quiero leer","Leyendo","Leído"],FM=["Físico","Digital","Audio"];
+const SEED=[{id:1,bookId:3,status:"Leyendo",formats:["Físico"],date:"",rating:0,review:"",rs:"none"},{id:2,bookId:2,status:"Leyendo",formats:["Digital"],date:"",rating:0,review:"",rs:"none"}];
+let CAT=[...BOOKS];
+const bk=id=>CAT.find(b=>b.id===id);
+const fmt=n=>String(n).replace(".",",");
+const Cover=({b,cls="cover",style})=><div className={cls+" c"+b.c} style={style}>{b.t.toUpperCase()}</div>;
+const Stars=({v,set})=><div className="stars" role="radiogroup" aria-label="Calificación">{[1,2,3,4,5].map(n=><button key={n} className={n<=v?"on":""} onClick={()=>set(n)} aria-label={n+" estrellas"}>★</button>)}</div>;
+
+function App(){
+ const [scr,setScr]=useState({n:"home"});
+ const [entries,setEntries]=useState(()=>{try{const s=localStorage.getItem("qa-entries2");return s?JSON.parse(s):SEED}catch(e){return SEED}});
+ const [custom,setCustom]=useState(()=>{try{const s=localStorage.getItem("qa-custom");return s?JSON.parse(s):[]}catch(e){return []}});
+ CAT=[...BOOKS,...custom];
+ const [toast,setToast]=useState("");
+ const [q,setQ]=useState("");
+ useEffect(()=>{try{localStorage.setItem("qa-entries2",JSON.stringify(entries));localStorage.setItem("qa-custom",JSON.stringify(custom))}catch(e){}},[entries,custom]);
+ useEffect(()=>{if(!toast)return;const t=setTimeout(()=>setToast(""),2200);return()=>clearTimeout(t)},[toast]);
+ const go=(n,p={})=>setScr({n,...p});
+ const read=entries.filter(e=>e.status==="Leído");
+ const revs=entries.filter(e=>e.rs==="approved");const pend=entries.filter(e=>e.rs==="pending");
+ const points=read.length*3+revs.length*2;
+ const add=(bookId)=>{const ex=entries.find(e=>e.bookId===bookId);if(ex){setToast("Ya está en tu biblioteca");return}
+  setEntries([...entries,{id:Date.now(),bookId,status:"Quiero leer",formats:["Físico"],date:"",rating:0,review:"",rs:"none"}]);setToast("Agregado a tu biblioteca")};
+ const upd=(id,patch)=>setEntries(entries.map(e=>e.id===id?{...e,...patch}:e));
+ const addBook=b=>{const nb={...b,id:Date.now(),r:0,c:Date.now()%5};setCustom([...custom,nb]);setToast("Libro cargado");go("book",{id:nb.id})};
+ const moderate=(id,ok,reason)=>{setEntries(entries.map(e=>e.id===id?{...e,rs:ok?"approved":"rejected",reason:ok?"":reason}:e));setToast(ok?"Reseña aprobada: suma 2 puntos":"Reseña rechazada")};
+ const nextStatus=e=>{const s=ST[(ST.indexOf(e.status)+1)%3];upd(e.id,{status:s});setToast("Ahora: "+s)};
+ const tab=["home","library","search","profile"].includes(scr.n)?scr.n:(scr.n==="book"||scr.n==="add")?"search":scr.n==="mod"?"profile":scr.n==="log"?"library":"home";
+ const heads={home:["¿Qué leemos hoy?","Descubrí tu próxima historia"],library:["Mi biblioteca","Organizá tus lecturas"],search:["Buscar","Título, autor o ISBN"],book:["Ficha del libro","Conocé la historia y las opiniones"],log:["Registrar lectura","Guardá tu experiencia"],add:["Cargar un libro","Sumalo al catálogo compartido"],mod:["Moderación","Reseñas pendientes de aprobación"],profile:["Mi perfil","Tu recorrido como lector"]}[scr.n];
+
+ return <div className="phone">
+  <div className="top"><small>QuéAhora? 📚</small><h2>{heads[0]}</h2><small>{heads[1]}</small></div>
+  <div className="content">
+   {scr.n==="home"&&<Home go={go} entries={entries} points={points} nRead={read.length} q={q} setQ={setQ}/>}
+   {scr.n==="library"&&<Library go={go} entries={entries} nextStatus={nextStatus} filter={scr.f||"Leyendo"}/>}
+   {scr.n==="search"&&<Search go={go} q={q} setQ={setQ}/>}
+   {scr.n==="book"&&<Book id={scr.id} go={go} add={add} entries={entries}/>}
+   {scr.n==="log"&&<Log key={scr.entryId} entry={entries.find(e=>e.id===scr.entryId)} upd={upd} go={go} toast={setToast}/>}
+   {scr.n==="add"&&<AddBook addBook={addBook}/>}
+   {scr.n==="mod"&&<Moderation entries={entries} moderate={moderate}/>}
+   {scr.n==="profile"&&<Profile nRead={read.length} nRev={revs.length} pend={pend.length} go={go} points={points} toast={setToast}/>}
+  </div>
+  {toast&&<div className="toast" role="status">{toast}</div>}
+  <nav className="nav">{[["home","⌂","Inicio"],["library","▤","Biblioteca"],["search","⌕","Buscar"],["profile","◯","Perfil"]].map(([k,i,l])=>
+   <button key={k} className={tab===k?"on":""} onClick={()=>go(k)}><i>{i}</i>{l}</button>)}</nav>
+ </div>;
+}
+
+function Home({go,entries,points,nRead,q,setQ}){
+ const cur=entries.find(e=>e.status==="Leyendo");
+ return <>
+  <input className="search" placeholder="⌕ Buscar título, autor o ISBN" value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go("search")} aria-label="Buscar"/>
+  <div className="section">Para descubrir</div>
+  <div className="row">{BOOKS.slice(0,2).map(b=><button key={b.id} className="book" onClick={()=>go("book",{id:b.id})}><Cover b={b}/><b>{b.t}</b><span className="muted">{b.a} · ★ {fmt(b.r)}</span></button>)}</div>
+  <div className="section">Tu lectura actual</div>
+  {cur?<div className="listbook"><Cover b={bk(cur.bookId)} cls="mini" style={{}}/><div><b>{bk(cur.bookId).t}</b><div className="muted">Leyendo · formato {cur.formats.join(", ").toLowerCase()}</div><button className="chip" onClick={()=>go("library")}>Ver mi biblioteca</button></div></div>
+   :<p className="note">Todavía no empezaste ningún libro. Elegí uno en Buscar.</p>}
+  <div className="section">Tus puntos</div>
+  <div className="row"><div className="stat"><strong>{points}</strong><span className="muted">Puntos acumulados</span></div><div className="stat"><strong>{nRead}</strong><span className="muted">Libros leídos</span></div></div>
+ </>;
+}
+
+function Library({go,entries,nextStatus,filter}){
+ const list=entries.filter(e=>e.status===filter);
+ return <>
+  <div>{ST.map(s=><button key={s} className={"chip"+(s===filter?" active":"")} onClick={()=>go("library",{f:s})}>{s}</button>)}</div>
+  <div className="section">{filter==="Leyendo"?"Leyendo ahora":filter}</div>
+  {list.length===0&&<p className="note">No hay libros en “{filter}”. Agregá uno desde Buscar.</p>}
+  {list.map(e=>{const b=bk(e.bookId);return <div className="listbook" key={e.id}>
+   <Cover b={b} cls="mini"/>
+   <div style={{flex:1}}><b>{b.t}</b><div className="muted">{b.a}</div><div className="muted">Formatos: {e.formats.join(", ").toLowerCase()}</div>
+    <button className="chip" onClick={()=>nextStatus(e)}>Cambiar estado</button><button className="chip" onClick={()=>go("log",{entryId:e.id})}>Registrar</button></div></div>})}
+  <button className="btn" onClick={()=>go("search")}>+ Agregar un libro</button>
+  <p className="note">Un mismo libro puede registrar varias lecturas en diferentes fechas y formatos.</p>
+ </>;
+}
+
+function Search({go,q,setQ}){
+ const res=useMemo(()=>{const s=q.trim().toLowerCase();return CAT.filter(b=>!s||(b.t+b.a+b.isbn).toLowerCase().includes(s))},[q]);
+ return <>
+  <input className="search" autoFocus placeholder="Buscar título, autor o ISBN" value={q} onChange={e=>setQ(e.target.value)} aria-label="Buscar"/>
+  {res.length===0&&<p className="note">No encontramos resultados para “{q}”. Probá con otro título, autor o ISBN.</p>}
+  {res.map(b=><button key={b.id} className="listbook" style={{width:"100%",border:0,textAlign:"left",color:"inherit",font:"inherit",cursor:"pointer"}} onClick={()=>go("book",{id:b.id})}>
+   <Cover b={b} cls="mini"/><div><b>{b.t}</b><div className="muted">{b.a} · {b.g}</div><div className="muted">{b.r?"★ "+fmt(b.r):"Sin calificaciones"}</div></div></button>)}
+  <p className="note" style={{marginTop:14}}>¿No encontrás tu libro?</p>
+  <button className="btn" style={{marginTop:6}} onClick={()=>go("add")}>Cargarlo manualmente</button>
+ </>;
+}
+
+function Book({id,go,add,entries}){
+ const b=bk(id),mine=entries.find(e=>e.bookId===id);
+ const rv=[...(SEED_REV[id]||[]),...entries.filter(e=>e.bookId===id&&e.rs!=="none").map(e=>["Vos",e.rating,e.review,e.rs,e.reason])];
+ return <>
+  <div className="row"><Cover b={b} style={{width:110,height:155,flex:"none"}}/><div><h3 style={{margin:0}}>{b.t}</h3><div className="muted">{b.a}</div><p style={{margin:"10px 0"}}>{b.r?"★ "+fmt(b.r)+" / 5":"Sin calificaciones"}</p><div className="muted">{b.p?b.p+" páginas · ":""}{b.g}</div><span className="chip" style={{cursor:"default"}}>{rv.filter(r=>!r[3]||r[3]==="approved").length} reseñas</span></div></div>
+  {mine?<button className="btn" onClick={()=>go("log",{entryId:mine.id})}>Registrar mi lectura</button>:<button className="btn" onClick={()=>add(id)}>+ Agregar a mi biblioteca</button>}
+  <div className="section">Reseñas de lectores</div>
+  {rv.length===0&&<p className="note">Todavía no hay reseñas. Sé el primero en opinar.</p>}
+  {rv.map((r,i)=><div className="review" key={i}><b>{r[0]} · {"★".repeat(r[1])}{"☆".repeat(5-r[1])}</b><p className="note">{r[2]}</p>{r[3]==="pending"&&<span className="chip" style={{cursor:"default"}}>En revisión · solo la ves vos</span>}{r[3]==="rejected"&&<p className="note" style={{color:"var(--coral)"}}>Rechazada: {r[4]}. Podés editarla desde Registrar lectura y volver a enviarla.</p>}</div>)}
+ </>;
+}
+
+function Log({entry,upd,go,toast}){
+ const [f,setF]=useState(()=>({...entry,date:entry.date||new Date().toISOString().slice(0,10)}));
+ if(!entry)return <p className="note">No encontramos esa lectura.</p>;
+ const b=bk(entry.bookId),set=p=>setF({...f,...p});
+ const save=()=>{const t=f.review.trim();const rs=!t?"none":(t!==entry.review.trim()||entry.rs==="none")?"pending":entry.rs;upd(entry.id,{...f,rs,date:f.status==="Leído"?f.date:""});toast(rs==="pending"?"Lectura guardada. Tu reseña está en revisión":"Lectura guardada");go("library",{f:f.status})};
+ return <>
+  <b>{b.t}</b>
+  <div className="label">Estado de lectura</div>
+  <div>{ST.map(s=><button key={s} className={"chip"+(f.status===s?" active":"")} onClick={()=>set({status:s})}>{s}</button>)}</div>
+  {f.status==="Leído"&&<><div className="label">Fecha de finalización</div><input type="date" className="field" value={f.date} onChange={e=>set({date:e.target.value})}/></>}
+  <div className="label">Formatos (podés elegir varios)</div>
+  <div>{FM.map(s=>{const on=f.formats.includes(s);return <button key={s} className={"chip"+(on?" active":"")} aria-pressed={on} onClick={()=>set({formats:on?(f.formats.length>1?f.formats.filter(x=>x!==s):f.formats):[...f.formats,s]})}>{s}</button>})}</div>
+  <div className="label">Tu calificación</div>
+  <Stars v={f.rating} set={n=>set({rating:n})}/>
+  <div className="label">Tu reseña (opcional)</div>
+  <textarea className="field" rows="4" placeholder="¿Qué te pareció este libro? Compartí tu opinión..." value={f.review} onChange={e=>set({review:e.target.value})}/>
+  <button className="btn" onClick={save}>Guardar lectura</button>
+  <p className="note">Las reseñas se publican para todos los lectores después de ser aprobadas. Mientras tanto, solo las ves vos.</p>
+ </>;
+}
+
+function Profile({nRead,nRev,pend,go,points,toast}){
+ return <>
+  <div className="row" style={{alignItems:"center"}}><div style={{width:62,height:62,borderRadius:"50%",background:"var(--chip)",display:"grid",placeItems:"center",fontSize:30}}>☺</div>
+   <div><b>Mi usuario</b><div className="muted">Ciudad Autónoma de Buenos Aires</div><div className="muted">Barrio: Belgrano (ejemplo)</div></div></div>
+  <div className="section">Mi actividad</div>
+  <div className="row"><div className="stat"><strong>{nRead}</strong><span className="muted">Libros leídos</span></div><div className="stat"><strong>{nRev}</strong><span className="muted">Reseñas</span></div></div>
+  <div className="section">Mis puntos</div>
+  <div className="stat" style={{textAlign:"left"}}><strong>{points} ✦</strong><div className="muted">Puntos acumulados</div><p className="note">Ganás 3 puntos por cada libro leído y 2 por cada reseña aprobada. Los canjes se habilitarán con comercios participantes.</p></div>
+  {pend>0&&<p className="note" style={{marginTop:12}}>Tenés {pend} {pend===1?"reseña":"reseñas"} en revisión. Suman puntos cuando se aprueban.</p>}
+  <button className="item" onClick={()=>go("mod")}>Moderar reseñas (demo) <span>{pend>0?pend+" pendientes":"›"}</span></button>
+  <div className="section">Mi cuenta</div>
+  <button className="item">Editar perfil y ubicación <span>›</span></button>
+  <button className="item" onClick={()=>toast("Próximamente: importar tu biblioteca desde un archivo")}>Importar biblioteca <span className="muted">(próximamente)</span></button>
+ </>;
+}
+function AddBook({addBook}){
+ const [f,setF]=useState({t:"",a:"",p:"",g:"",isbn:""});
+ const ok=f.t.trim()&&f.a.trim();
+ const F=(k,l,ph,type)=><><div className="label">{l}</div><input className="field" type={type||"text"} placeholder={ph} value={f[k]} onChange={e=>setF({...f,[k]:e.target.value})}/></>;
+ return <>
+  <p className="note">Si no encontraste tu libro, cargalo vos. Queda disponible para todos los lectores.</p>
+  {F("t","Título *","Ej.: Los relojes de Palermo")}
+  {F("a","Autor o autora *","Nombre y apellido")}
+  {F("g","Género","Novela, ensayo, poesía...")}
+  {F("p","Páginas","320","number")}
+  {F("isbn","ISBN (opcional)","978...")}
+  <button className="btn" disabled={!ok} onClick={()=>addBook({t:f.t.trim(),a:f.a.trim(),p:+f.p||0,g:f.g.trim()||"Sin género",isbn:f.isbn.trim()})}>Cargar libro</button>
+  <p className="note">En la versión real, al escribir el ISBN completaremos título, autor y portada desde Google Books u Open Library.</p>
+ </>;
+}
+function Moderation({entries,moderate}){
+ const list=entries.filter(e=>e.rs==="pending");
+ const [rej,setRej]=useState(null);const [why,setWhy]=useState("");
+ const done=entries.filter(e=>e.rs==="approved"||e.rs==="rejected");
+ return <>
+  <p className="note">Aprobar publica la reseña y suma 2 puntos al lector. Al rechazar, el lector ve el motivo y puede corregirla.</p>
+  <div className="section">Pendientes ({list.length})</div>
+  {list.length===0&&<p className="note">No hay reseñas pendientes. Cuando un lector envíe una, aparece acá.</p>}
+  {list.map(e=><div className="review" key={e.id}>
+   <b>{bk(e.bookId).t}</b>
+   <div className="muted">Lector: Vos · {"★".repeat(e.rating)}{"☆".repeat(5-e.rating)}</div>
+   <p className="note">{e.review}</p>
+   {rej===e.id?<>
+    <div>{["Lenguaje ofensivo","Spoilers sin aviso","No es una reseña"].map(m=><button key={m} className={"chip"+(why===m?" active":"")} onClick={()=>setWhy(m)}>{m}</button>)}</div>
+    <input className="field" placeholder="Motivo del rechazo" value={why} onChange={ev=>setWhy(ev.target.value)}/>
+    <button className="chip active" disabled={!why.trim()} onClick={()=>{moderate(e.id,false,why.trim());setRej(null);setWhy("")}}>Confirmar rechazo</button>
+    <button className="chip" onClick={()=>{setRej(null);setWhy("")}}>Cancelar</button>
+   </>:<>
+    <button className="chip active" onClick={()=>moderate(e.id,true)}>Aprobar</button>
+    <button className="chip" onClick={()=>{setRej(e.id);setWhy("")}}>Rechazar</button>
+   </>}
+  </div>)}
+  {done.length>0&&<p className="note">Ya moderadas: {done.filter(e=>e.rs==="approved").length} aprobadas · {done.filter(e=>e.rs==="rejected").length} rechazadas.</p>}
+ </>;
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>

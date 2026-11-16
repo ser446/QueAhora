@@ -38,5 +38,5 @@ src/screens/       Home, Library, Search, Book, Log, Profile, AddBook, Moderatio
 ## Qué es de ejemplo y qué falta para producción
 - Catálogo de 5 libros ficticios + libros cargados a mano (solo visibles en este navegador).
 - Moderación de reseñas: pantalla de demostración accesible desde Perfil; en producción debe ser un rol aparte.
-- Puntos: 3 por libro leído y 2 por reseña aprobada (regla definida para el prototipo).
+- Puntos: 2 por libro leído y 5 por reseña aprobada (regla definida para el prototipo).
 - Pendiente (requiere backend): cuentas de usuario, base de datos compartida, moderación real, importación de bibliotecas y datos de Google Books u Open Library.

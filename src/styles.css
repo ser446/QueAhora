@@ -1,0 +1,43 @@
+:root{--teal:#177e89;--coral:#ff795e;--cream:#f8f6f0;--ink:#243247;--card:#fff;--line:#e0e4e6;--muted:#687681;--chip:#e1f3f0;--chipink:#12636b;--page:#e9edf0;--frame:#283342;--star:#e0ae37}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--cream:#172029;--ink:#e8edf0;--card:#222d38;--line:#33414d;--muted:#9aa8b2;--chip:#1e3b40;--chipink:#8fd3da;--page:#0e1419;--frame:#3a4856;--star:#f0c45a}}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--page);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);display:flex;justify-content:center;align-items:center;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+#root{width:100%;display:flex;justify-content:center}
+.phone{width:360px;max-width:100%;height:min(740px,100vh);background:var(--cream);border:8px solid var(--frame);border-radius:32px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 8px 24px #0003}
+@media (max-width:420px){.phone{border:0;border-radius:0;height:100vh;width:100%}}
+.top{background:var(--teal);color:#fff;padding:20px 18px 18px;flex:none}
+.top h2{margin:2px 0 0;font-size:22px}.top small{opacity:.9}
+.top button{background:none;border:0;color:#fff;font:inherit;padding:0;cursor:pointer}
+.content{padding:16px 18px 20px;overflow-y:auto;flex:1}
+.nav{flex:none;height:62px;background:var(--card);border-top:1px solid var(--line);display:flex}
+.nav button{flex:1;background:none;border:0;color:var(--muted);font-size:11px;cursor:pointer;line-height:1.3}
+.nav button.on{color:var(--teal);font-weight:700}
+.nav i{display:block;font-style:normal;font-size:18px}
+.search{width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px;font:inherit;color:var(--ink);margin:6px 0 4px}
+.section{font-weight:750;margin:18px 0 10px}
+.row{display:flex;gap:10px}
+.book{background:var(--card);border-radius:14px;padding:10px;box-shadow:0 2px 5px #0001;flex:1;border:0;text-align:left;color:inherit;font:inherit;cursor:pointer}
+.cover{height:125px;border-radius:8px;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;font:700 14px Georgia,serif}
+.c0{background:linear-gradient(145deg,#316e83,#1f3548)}.c1{background:linear-gradient(140deg,#d68a64,#804956)}.c2{background:linear-gradient(140deg,#6e8c68,#314f45)}.c3{background:linear-gradient(140deg,#8a6fa8,#43315e)}.c4{background:linear-gradient(140deg,#c9a24b,#7a5a1e)}
+.book b{display:block;font-size:12px;margin-top:8px}
+.muted{color:var(--muted);font-size:12px}
+.chip{display:inline-block;background:var(--chip);color:var(--chipink);border-radius:20px;padding:7px 11px;font-size:12px;font-weight:650;margin:3px 4px 3px 0;border:0;cursor:pointer;font-family:inherit}
+.chip.active{background:var(--teal);color:#fff}
+.btn{background:var(--coral);border:0;color:#2c2630;padding:13px 16px;border-radius:12px;font:750 15px inherit;display:block;width:100%;margin-top:14px;cursor:pointer}
+.btn:disabled{opacity:.5;cursor:default}
+.listbook{display:flex;gap:12px;background:var(--card);border-radius:14px;padding:10px;margin:10px 0;align-items:center}
+.mini{width:54px;height:75px;flex:none;border-radius:5px;color:#fff;display:grid;place-items:center;text-align:center;font:11px Georgia;padding:5px}
+.stat{background:var(--card);border-radius:14px;padding:14px;flex:1;text-align:center}
+.stat strong{font-size:22px;color:var(--teal);display:block}
+.review{background:var(--card);border-radius:12px;padding:12px;margin:10px 0}
+.note{font-size:12px;color:var(--muted);line-height:1.5}
+.label{font-size:12px;font-weight:700;margin:15px 0 4px}
+.field{width:100%;background:var(--card);border:1px solid var(--line);padding:12px;border-radius:11px;font:13px inherit;color:var(--ink)}
+.stars button{background:none;border:0;font-size:30px;color:var(--line);cursor:pointer;padding:0 2px}
+.stars button.on{color:var(--star)}
+.item{display:flex;justify-content:space-between;width:100%;background:var(--card);border:1px solid var(--line);padding:12px;border-radius:11px;margin:9px 0;font:13px inherit;color:var(--ink);cursor:pointer}
+.toast{position:absolute;left:18px;right:18px;bottom:76px;background:var(--ink);color:var(--cream);padding:12px 14px;border-radius:12px;font-size:13px;text-align:center}
+:focus-visible{outline:3px solid var(--coral);outline-offset:2px}
+.nav{height:auto;min-height:62px;padding-bottom:env(safe-area-inset-bottom,0px)}
+.nav button{min-height:62px}

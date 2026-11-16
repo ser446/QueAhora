@@ -1,5 +1,5 @@
 import {useState,useEffect,useMemo} from "react";
-import {BOOKS,CAT,SEED_REV,ST,FM,bk,fmt} from "../data.js";
+import {BOOKS,CAT,SEED_REV,ST,FM,bk,fmt,PTS_LIBRO,PTS_RESENA} from "../data.js";
 import {Cover,Stars} from "../ui.jsx";
 
 export default function Moderation({entries,moderate}){
@@ -7,7 +7,7 @@ export default function Moderation({entries,moderate}){
  const [rej,setRej]=useState(null);const [why,setWhy]=useState("");
  const done=entries.filter(e=>e.rs==="approved"||e.rs==="rejected");
  return <>
-  <p className="note">Aprobar publica la reseña y suma 2 puntos al lector. Al rechazar, el lector ve el motivo y puede corregirla.</p>
+  <p className="note">Aprobar publica la reseña y suma {PTS_RESENA} puntos al lector. Al rechazar, el lector ve el motivo y puede corregirla.</p>
   <div className="section">Pendientes ({list.length})</div>
   {list.length===0&&<p className="note">No hay reseñas pendientes. Cuando un lector envíe una, aparece acá.</p>}
   {list.map(e=><div className="review" key={e.id}>

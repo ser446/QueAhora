@@ -19,3 +19,7 @@ import * as real from "./db.supabase.js";
 
 const impl = isConfigured ? real : demo;
 export const {listBooks, addBook, getProfile, saveProfile, aliasAvailable, listEntries, addEntry, saveEntry, listReviews, listPending, moderate} = impl;
+
+export const listFeaturedBooks = isConfigured
+  ? real.listFeaturedBooks
+  : async () => (await demo.listBooks()).slice(0, 2);

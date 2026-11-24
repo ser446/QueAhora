@@ -15,6 +15,27 @@ const toEntry = (e, rv) => ({id: e.id, bookId: e.book_id, status: e.status, form
   rating: e.rating || 0, review: rv ? rv.body : "", rs: rv ? rv.status : "none", reason: rv ? rv.reject_reason || "" : ""});
 
 // ---- Catálogo
+// El catálogo de la portada usa el esquema compartido de QuéAhora? Lectores.
+export async function listFeaturedBooks() {
+  const {data, error} = await supabase.from("obras")
+    .select("id, titulo, obras_autores(orden_autoria, autores(nombre))")
+    .order("creado_en", {ascending: false})
+    .order("id")
+    .limit(2);
+  if (error) fail(error, "No pudimos cargar los libros del catálogo.");
+
+  return data.map(obra => ({
+    id: obra.id,
+    t: obra.titulo,
+    a: (obra.obras_autores ?? [])
+      .sort((a, b) => (a.orden_autoria ?? Infinity) - (b.orden_autoria ?? Infinity))
+      .map(relacion => relacion.autores?.nombre)
+      .filter(Boolean)
+      .join(", "),
+    c: parseInt(obra.id.slice(0, 8), 16) % 5,
+  }));
+}
+
 export async function listBooks() {
   const {data, error} = await supabase.rpc("books_with_stats");
   if (error) fail(error, "No pudimos cargar los libros.");

@@ -1,5 +1,5 @@
 import {useState,useEffect,useMemo} from "react";
-import {BOOKS,CAT,SEED_REV,ST,FM,bk,fmt} from "../data.js";
+import {BOOKS,CAT,ST,FM,bk,fmt} from "../data.js";
 import {Cover,Stars} from "../ui.jsx";
 
 export default function AddBook({addBook}){

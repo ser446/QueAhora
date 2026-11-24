@@ -1,12 +1,12 @@
 import {useState,useEffect,useMemo} from "react";
-import {BOOKS,CAT,SEED_REV,ST,FM,bk,fmt} from "../data.js";
+import {BOOKS,CAT,ST,FM,bk,fmt} from "../data.js";
 import {Cover,Stars} from "../ui.jsx";
 
 export default function Log({entry,upd,go,toast}){
  const [f,setF]=useState(()=>({...entry,date:entry.date||new Date().toISOString().slice(0,10)}));
  if(!entry)return <p className="note">No encontramos esa lectura.</p>;
  const b=bk(entry.bookId),set=p=>setF({...f,...p});
- const save=()=>{const t=f.review.trim();const rs=!t?"none":(t!==entry.review.trim()||entry.rs==="none")?"pending":entry.rs;upd(entry.id,{...f,rs,date:f.status==="Leído"?f.date:""});toast(rs==="pending"?"Lectura guardada. Tu reseña está en revisión":"Lectura guardada");go("library",{f:f.status})};
+ const save=async()=>{try{const next=await upd(entry.id,{...f,date:f.status==="Leído"?f.date:""});toast(next.rs==="pending"?"Lectura guardada. Tu reseña está en revisión":"Lectura guardada");go("library",{f:f.status})}catch(e){toast(e.message||"No pudimos guardar la lectura")}};
  return <>
   <b>{b.t}</b>
   <div className="label">Estado de lectura</div>

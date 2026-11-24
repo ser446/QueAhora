@@ -1,0 +1,99 @@
+import {supabase} from "./supabase.js";
+import {coverIdx} from "./data.js";
+
+const fail = (e, fallback) => {
+  if (e && e.code === "23505") throw new Error("Ese alias ya está en uso.");
+  if (e && e.code === "42501") throw new Error("No tenés permiso para hacer esto.");
+  throw new Error(fallback || "No pudimos completar la acción. Probá de nuevo.");
+};
+
+const toBook = r => ({id: r.id, t: r.title, a: r.author, p: r.pages || 0, g: r.genre || "Sin género", isbn: r.isbn || "",
+  r: r.avg_rating ? Number(r.avg_rating) : 0, c: coverIdx(r.id)});
+const toProfile = r => r ? ({nombre: r.nombre || "", apellido: r.apellido || "", alias: r.alias || "", pais: r.pais || "",
+  provincia: r.provincia || "", localidad: r.localidad || "", role: r.role || "user"}) : null;
+const toEntry = (e, rv) => ({id: e.id, bookId: e.book_id, status: e.status, formats: e.formats || ["Físico"], date: e.finished_on || "",
+  rating: e.rating || 0, review: rv ? rv.body : "", rs: rv ? rv.status : "none", reason: rv ? rv.reject_reason || "" : ""});
+
+// ---- Catálogo
+export async function listBooks() {
+  const {data, error} = await supabase.rpc("books_with_stats");
+  if (error) fail(error, "No pudimos cargar los libros.");
+  return data.map(toBook);
+}
+export async function addBook(userId, b) {
+  const {data, error} = await supabase.from("books")
+    .insert({title: b.t, author: b.a, pages: b.p || null, genre: b.g, isbn: b.isbn || null, created_by: userId}).select().single();
+  if (error) fail(error);
+  return toBook(data);
+}
+
+// ---- Perfiles
+export async function getProfile(userId) {
+  const {data, error} = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+  if (error) fail(error, "No pudimos cargar tu perfil.");
+  return toProfile(data);
+}
+export async function saveProfile(userId, f) {
+  const {data, error} = await supabase.from("profiles")
+    .update({nombre: f.nombre, apellido: f.apellido, alias: f.alias, pais: f.pais, provincia: f.provincia, localidad: f.localidad})
+    .eq("id", userId).select().single();
+  if (error) fail(error);
+  return toProfile(data);
+}
+export async function aliasAvailable(alias) {
+  const {data, error} = await supabase.rpc("alias_available", {a: alias});
+  return error ? true : Boolean(data); // si falla la consulta, la base de datos igual impide duplicados
+}
+
+// ---- Lecturas del usuario
+export async function listEntries(userId) {
+  const [a, b] = await Promise.all([
+    supabase.from("reading_entries").select("*").eq("user_id", userId),
+    supabase.from("reviews").select("*").eq("user_id", userId)
+  ]);
+  if (a.error || b.error) fail(a.error || b.error, "No pudimos cargar tu biblioteca.");
+  return a.data.map(e => toEntry(e, b.data.find(r => r.book_id === e.book_id)));
+}
+export async function addEntry(userId, bookId) {
+  const {data, error} = await supabase.from("reading_entries")
+    .insert({user_id: userId, book_id: bookId, status: "Quiero leer", formats: ["Físico"]}).select().single();
+  if (error) fail(error);
+  return toEntry(data, null);
+}
+export async function saveEntry(userId, e) {
+  const {data: ent, error} = await supabase.from("reading_entries")
+    .update({status: e.status, formats: e.formats, finished_on: e.status === "Leído" && e.date ? e.date : null, rating: e.rating || null})
+    .eq("id", e.id).eq("user_id", userId).select().single();
+  if (error) fail(error);
+  const {data: old} = await supabase.from("reviews").select("*").eq("user_id", userId).eq("book_id", ent.book_id).maybeSingle();
+  const body = (e.review || "").trim();
+  let rv = old;
+  if (!body) {
+    if (old) { await supabase.from("reviews").delete().eq("id", old.id); rv = null; }
+  } else if (!old) {
+    const r = await supabase.from("reviews").insert({user_id: userId, book_id: ent.book_id, body, rating: e.rating || null}).select().single();
+    if (r.error) fail(r.error);
+    rv = r.data; // el trigger la deja en "pending"
+  } else if (old.body !== body || (old.rating || 0) !== (e.rating || 0)) {
+    const r = await supabase.from("reviews").update({body, rating: e.rating || null}).eq("id", old.id).select().single();
+    if (r.error) fail(r.error);
+    rv = r.data; // si cambió el texto, el trigger la vuelve a "pending"
+  }
+  return toEntry(ent, rv);
+}
+
+// ---- Reseñas y moderación (funciones RPC: ver supabase/schema.sql)
+export async function listReviews(bookId) {
+  const {data, error} = await supabase.rpc("book_reviews", {p_book: bookId});
+  if (error) fail(error, "No pudimos cargar las reseñas.");
+  return data.map(r => ({id: r.id, alias: r.alias || "Lector", rating: r.rating || 0, body: r.body, status: r.status, reason: r.reject_reason || "", mine: r.mine}));
+}
+export async function listPending() {
+  const {data, error} = await supabase.rpc("pending_reviews");
+  if (error) fail(error, "No pudimos cargar las reseñas pendientes.");
+  return data.map(r => ({id: r.id, bookId: r.book_id, title: r.title, alias: r.alias || "Lector", rating: r.rating || 0, body: r.body}));
+}
+export async function moderate(id, ok, reason) {
+  const {error} = await supabase.rpc("moderate_review", {p_id: id, p_ok: ok, p_reason: reason || null});
+  if (error) fail(error, "No pudimos moderar la reseña.");
+}

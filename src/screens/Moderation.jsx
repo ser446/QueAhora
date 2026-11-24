@@ -1,29 +1,36 @@
-import {useState,useEffect,useMemo} from "react";
-import {BOOKS,CAT,SEED_REV,ST,FM,bk,fmt,PTS_LIBRO,PTS_RESENA} from "../data.js";
-import {Cover,Stars} from "../ui.jsx";
+import {useState,useEffect} from "react";
+import {PTS_RESENA} from "../data.js";
+import * as db from "../db.js";
 
-export default function Moderation({entries,moderate}){
- const list=entries.filter(e=>e.rs==="pending");
+// Solo para administradores (App.jsx lo protege y la base de datos lo exige con is_admin()).
+export default function Moderation({toast}){
+ const [list,setList]=useState(null);
  const [rej,setRej]=useState(null);const [why,setWhy]=useState("");
- const done=entries.filter(e=>e.rs==="approved"||e.rs==="rejected");
+ const [n,setN]=useState({ok:0,no:0});
+ useEffect(()=>{db.listPending().then(setList).catch(e=>{toast(e.message);setList([])})},[]);
+ const act=async(r,ok,reason)=>{
+  try{await db.moderate(r.id,ok,reason);setList(l=>l.filter(x=>x.id!==r.id));setN(s=>ok?{...s,ok:s.ok+1}:{...s,no:s.no+1});
+   toast(ok?"Reseña aprobada: suma "+PTS_RESENA+" puntos":"Reseña rechazada");setRej(null);setWhy("")}
+  catch(e){toast(e.message)}
+ };
  return <>
   <p className="note">Aprobar publica la reseña y suma {PTS_RESENA} puntos al lector. Al rechazar, el lector ve el motivo y puede corregirla.</p>
-  <div className="section">Pendientes ({list.length})</div>
-  {list.length===0&&<p className="note">No hay reseñas pendientes. Cuando un lector envíe una, aparece acá.</p>}
-  {list.map(e=><div className="review" key={e.id}>
-   <b>{bk(e.bookId).t}</b>
-   <div className="muted">Lector: Vos · {"★".repeat(e.rating)}{"☆".repeat(5-e.rating)}</div>
-   <p className="note">{e.review}</p>
-   {rej===e.id?<>
+  <div className="section">Pendientes ({list?list.length:"…"})</div>
+  {list&&list.length===0&&<p className="note">No hay reseñas pendientes. Cuando un lector envíe una, aparece acá.</p>}
+  {(list||[]).map(r=><div className="review" key={r.id}>
+   <b>{r.title}</b>
+   <div className="muted">Lector: @{r.alias} · {"★".repeat(r.rating)}{"☆".repeat(5-r.rating)}</div>
+   <p className="note">{r.body}</p>
+   {rej===r.id?<>
     <div>{["Lenguaje ofensivo","Spoilers sin aviso","No es una reseña"].map(m=><button key={m} className={"chip"+(why===m?" active":"")} onClick={()=>setWhy(m)}>{m}</button>)}</div>
     <input className="field" placeholder="Motivo del rechazo" value={why} onChange={ev=>setWhy(ev.target.value)}/>
-    <button className="chip active" disabled={!why.trim()} onClick={()=>{moderate(e.id,false,why.trim());setRej(null);setWhy("")}}>Confirmar rechazo</button>
+    <button className="chip active" disabled={!why.trim()} onClick={()=>act(r,false,why.trim())}>Confirmar rechazo</button>
     <button className="chip" onClick={()=>{setRej(null);setWhy("")}}>Cancelar</button>
    </>:<>
-    <button className="chip active" onClick={()=>moderate(e.id,true)}>Aprobar</button>
-    <button className="chip" onClick={()=>{setRej(e.id);setWhy("")}}>Rechazar</button>
+    <button className="chip active" onClick={()=>act(r,true)}>Aprobar</button>
+    <button className="chip" onClick={()=>{setRej(r.id);setWhy("")}}>Rechazar</button>
    </>}
   </div>)}
-  {done.length>0&&<p className="note">Ya moderadas: {done.filter(e=>e.rs==="approved").length} aprobadas · {done.filter(e=>e.rs==="rejected").length} rechazadas.</p>}
+  {(n.ok>0||n.no>0)&&<p className="note">En esta sesión: {n.ok} aprobadas · {n.no} rechazadas.</p>}
  </>;
 }

@@ -1,6 +1,6 @@
 // Service worker de QuéAhora? — permite abrir la app sin conexión.
 // Al publicar cambios, subí el número de versión para renovar la caché.
-const CACHE = "queahora-v1";
+const CACHE = "queahora-v2";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", e => {

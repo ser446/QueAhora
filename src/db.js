@@ -23,3 +23,5 @@ export const {listBooks, addBook, getProfile, saveProfile, aliasAvailable, listE
 export const listFeaturedBooks = isConfigured
   ? real.listFeaturedBooks
   : async () => (await demo.listBooks()).slice(0, 2);
+
+export const searchCatalogBooks = real.searchCatalogBooks;

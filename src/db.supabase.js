@@ -15,16 +15,9 @@ const toEntry = (e, rv) => ({id: e.id, bookId: e.book_id, status: e.status, form
   rating: e.rating || 0, review: rv ? rv.body : "", rs: rv ? rv.status : "none", reason: rv ? rv.reject_reason || "" : ""});
 
 // ---- Catálogo
-// El catálogo de la portada usa el esquema compartido de QuéAhora? Lectores.
-export async function listFeaturedBooks() {
-  const {data, error} = await supabase.from("obras")
-    .select("id, titulo, obras_autores(orden_autoria, autores(nombre))")
-    .order("creado_en", {ascending: false})
-    .order("id")
-    .limit(2);
-  if (error) fail(error, "No pudimos cargar los libros del catálogo.");
+const catalogColumns = "id, titulo, obras_autores(orden_autoria, autores(nombre))";
 
-  return data.map(obra => ({
+const toCatalogBook = obra => ({
     id: obra.id,
     t: obra.titulo,
     a: (obra.obras_autores ?? [])
@@ -33,7 +26,51 @@ export async function listFeaturedBooks() {
       .filter(Boolean)
       .join(", "),
     c: parseInt(obra.id.slice(0, 8), 16) % 5,
-  }));
+});
+
+function catalogQuery(columns = catalogColumns) {
+  return supabase.from("obras").select(columns);
+}
+
+export async function listFeaturedBooks() {
+  const {data, error} = await catalogQuery()
+    .order("creado_en", {ascending: false})
+    .order("id")
+    .limit(2);
+  if (error) fail(error, "No pudimos cargar los libros del catálogo.");
+  return data.map(toCatalogBook);
+}
+
+export async function searchCatalogBooks(query) {
+  const term = query.trim();
+  if (!term) return [];
+
+  const pattern = "%" + term.replace(/[\\%_]/g, "\\$&").replaceAll("*", "\\%") + "%";
+  const isbn = term.replace(/[\s-]/g, "").toUpperCase();
+  const queries = [
+    catalogQuery().ilike("titulo", pattern),
+    catalogQuery(catalogColumns + ", coincidencias:obras_autores!inner(autores!inner(nombre))")
+      .ilike("coincidencias.autores.nombre", pattern),
+  ];
+  if (/^[0-9]{13}$/.test(isbn)) {
+    queries.push(catalogQuery(catalogColumns + ", coincidencias:ediciones!inner(isbn_13)")
+      .eq("coincidencias.isbn_13", isbn));
+  } else if (/^[0-9]{9}[0-9X]$/.test(isbn)) {
+    queries.push(catalogQuery(catalogColumns + ", coincidencias:ediciones!inner(isbn_10)")
+      .eq("coincidencias.isbn_10", isbn));
+  }
+
+  const results = await Promise.all(queries.map(request =>
+    request.order("titulo").order("id").limit(30)
+  ));
+  const failed = results.find(result => result.error);
+  if (failed) fail(failed.error, "No pudimos buscar en el catálogo.");
+
+  const books = new Map();
+  for (const result of results) {
+    for (const obra of result.data) books.set(obra.id, toCatalogBook(obra));
+  }
+  return [...books.values()].slice(0, 30);
 }
 
 export async function listBooks() {

@@ -123,6 +123,27 @@ export async function getCatalogBook(id) {
   };
 }
 
+export async function listCatalogLibrary(userId) {
+  const {data, error} = await supabase.from("biblioteca_usuario")
+    .select("id, obras(" + catalogColumns + "), ediciones!biblioteca_edicion_obra_correcta(formato, tapa_ruta), lecturas(id, estado, creado_en)")
+    .eq("usuario_id", userId)
+    .order("agregado_en", {ascending: false})
+    .order("id")
+    .order("creado_en", {referencedTable: "lecturas", ascending: false})
+    .order("id", {referencedTable: "lecturas"})
+    .limit(1, {referencedTable: "lecturas"});
+  if (error) fail(error, "No pudimos cargar tu biblioteca.");
+  return data.filter(entry => entry.obras).map(entry => ({
+    id: entry.id,
+    book: {
+  ...toCatalogBook(entry.obras),
+  coverUrl: coverUrl(entry.ediciones?.tapa_ruta),
+},
+    format: entry.ediciones?.formato,
+    status: entry.lecturas?.[0]?.estado ?? "pendiente",
+  }));
+}
+
 export async function listBooks() {
   const {data, error} = await supabase.rpc("books_with_stats");
   if (error) fail(error, "No pudimos cargar los libros.");

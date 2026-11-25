@@ -6,6 +6,8 @@ import Auth from "./screens/Auth.jsx";
 import ProfileForm from "./screens/ProfileForm.jsx";
 import Home from "./screens/Home.jsx";
 import Library from "./screens/Library.jsx";
+import CatalogLibrary from "./screens/CatalogLibrary.jsx";
+import {isConfigured} from "./supabase.js";
 import Search from "./screens/Search.jsx";
 import Book from "./screens/Book.jsx";
 import CatalogBook from "./screens/CatalogBook.jsx";
@@ -89,9 +91,11 @@ export default function App(){
   <div className="top"><small>QuéAhora? 📚</small><h2>{heads[0]}</h2><small>{heads[1]}</small></div>
   <div className="content">
    {scr.n==="home"&&<Home go={go} user={user} entries={entries} points={points} nRead={read.length} q={q} setQ={setQ}/>}
-   {scr.n==="library"&&user&&<Library go={go} entries={entries} nextStatus={nextStatus} filter={scr.f||"Leyendo"}/>}
+   {scr.n==="library"&&user&&(isConfigured
+    ? <CatalogLibrary key={user.id} userId={user.id} go={go} filter={scr.f||"pendiente"}/>
+    : <Library go={go} entries={entries} nextStatus={nextStatus} filter={scr.f||"Leyendo"}/>)}
    {scr.n==="search"&&<Search go={go} q={q} setQ={setQ}/>}
-   {scr.n==="catalogBook"&&<CatalogBook key={scr.id} id={scr.id} onBack={()=>go(scr.from||"search")}/>}
+   {scr.n==="catalogBook"&&<CatalogBook key={scr.id} id={scr.id} onBack={()=>go(scr.from||"search",scr.from==="library"?{f:scr.libraryFilter}:{})}/>}
    {scr.n==="book"&&<Book id={scr.id} go={go} add={add} entries={entries} user={user}/>}
    {scr.n==="log"&&user&&<Log key={scr.entryId} entry={entries.find(e=>e.id===scr.entryId)} upd={upd} go={go} toast={setToast}/>}
    {scr.n==="add"&&user&&<AddBook addBook={addBook}/>}

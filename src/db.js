@@ -26,3 +26,4 @@ export const listFeaturedBooks = isConfigured
 
 export const searchCatalogBooks = real.searchCatalogBooks;
 export const getCatalogBook = real.getCatalogBook;
+export const listCatalogLibrary = real.listCatalogLibrary;

@@ -25,3 +25,4 @@ export const listFeaturedBooks = isConfigured
   : async () => (await demo.listBooks()).slice(0, 2);
 
 export const searchCatalogBooks = real.searchCatalogBooks;
+export const getCatalogBook = real.getCatalogBook;

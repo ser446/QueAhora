@@ -32,13 +32,37 @@ function catalogQuery(columns = catalogColumns) {
   return supabase.from("obras").select(columns);
 }
 
+function coverUrl(path) {
+  return path ? supabase.storage.from("tapas-libros").getPublicUrl(path).data.publicUrl : null;
+}
+
+async function withCatalogCovers(books) {
+  if (!books.length) return books;
+
+  const {data, error} = await supabase.from("ediciones")
+    .select("id, obra_id, tapa_ruta")
+    .in("obra_id", books.map(book => book.id))
+    .not("tapa_ruta", "is", null)
+    .order("id");
+  // Las tarjetas mantienen la portada provisoria si no pueden leer las tapas.
+  if (error) return books;
+
+  const firstCover = new Map();
+  for (const edition of data) {
+    if (edition.tapa_ruta && !firstCover.has(edition.obra_id)) {
+      firstCover.set(edition.obra_id, coverUrl(edition.tapa_ruta));
+    }
+  }
+  return books.map(book => ({...book, coverUrl: firstCover.get(book.id)}));
+}
+
 export async function listFeaturedBooks() {
   const {data, error} = await catalogQuery()
     .order("creado_en", {ascending: false})
     .order("id")
     .limit(2);
   if (error) fail(error, "No pudimos cargar los libros del catálogo.");
-  return data.map(toCatalogBook);
+  return withCatalogCovers(data.map(toCatalogBook));
 }
 
 export async function searchCatalogBooks(query) {
@@ -70,7 +94,33 @@ export async function searchCatalogBooks(query) {
   for (const result of results) {
     for (const obra of result.data) books.set(obra.id, toCatalogBook(obra));
   }
-  return [...books.values()].slice(0, 30);
+  return withCatalogCovers([...books.values()].slice(0, 30));
+}
+
+export async function getCatalogBook(id) {
+  const editionFields = "id, isbn_13, isbn_10, editorial, anio_publicacion, paginas, idioma, formato";
+  const get = fields => catalogQuery(
+    catalogColumns + ", descripcion, idioma_original, ediciones(" + fields + ")"
+  ).eq("id", id).order("id", {referencedTable: "ediciones"}).maybeSingle();
+
+  let result = await get(editionFields + ", tapa_ruta");
+  // Permite probar la ficha antes de instalar la columna de tapas.
+  if (result.error?.code === "42703" && result.error.message.includes("tapa_ruta")) {
+    result = await get(editionFields);
+  }
+  if (result.error) fail(result.error, "No pudimos cargar la ficha del libro.");
+  if (!result.data) return null;
+
+  const obra = result.data;
+  return {
+    ...toCatalogBook(obra),
+    description: obra.descripcion,
+    language: obra.idioma_original,
+    editions: (obra.ediciones ?? []).map(edition => ({
+      ...edition,
+      coverUrl: coverUrl(edition.tapa_ruta),
+    })),
+  };
 }
 
 export async function listBooks() {

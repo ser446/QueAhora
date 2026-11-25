@@ -42,7 +42,7 @@ export default function Search({go,q,setQ}){
     {b.a&&<div className="muted">{b.a}{b.g?" · "+b.g:""}</div>}
     {!isConfigured&&<div className="muted">{b.r?"★ "+fmt(b.r):"Sin calificaciones"}</div>}</div></>;
    return isConfigured
-    ? <article key={b.id} className="listbook">{content}</article>
+    ? <button key={b.id} className="listbook" style={{...cardStyle,cursor:"pointer"}} onClick={()=>go("catalogBook",{id:b.id,from:"search"})}>{content}</button>
     : <button key={b.id} className="listbook" style={{...cardStyle,cursor:"pointer"}} onClick={()=>go("book",{id:b.id})}>{content}</button>;
   })}
   <p className="note" style={{marginTop:14}}>¿No encontrás tu libro?</p>

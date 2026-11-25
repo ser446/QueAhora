@@ -24,7 +24,7 @@ export default function Home({go,user,entries,points,nRead,q,setQ}){
   <div className="row">{catalog.books.map(b=>{
    const card=<><Cover b={b}/><b>{b.t}</b>{b.a&&<span className="muted">{b.a}{b.r?" · ★ "+fmt(b.r):""}</span>}</>;
    return isConfigured
-    ? <article key={b.id} className="book">{card}</article>
+    ? <button key={b.id} className="book" onClick={()=>go("catalogBook",{id:b.id,from:"home"})}>{card}</button>
     : <button key={b.id} className="book" onClick={()=>go("book",{id:b.id})}>{card}</button>;
   })}</div>
   {user?<>

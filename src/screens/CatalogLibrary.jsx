@@ -41,7 +41,10 @@ export default function CatalogLibrary({userId,go,filter}){
     ? {...item,readingId,status,finishedOn:date}
     : item)}));
    setFinishingId(null);
-   setFeedback({message:"«"+entry.book.t+"» pasó a "+labels[status]+"."});
+   setFeedback({
+    message:"«"+entry.book.t+"» pasó a "+labels[status]+".",
+    review:status==="terminado"?{id:entry.book.id,entryId:entry.id,date}:null,
+   });
    go("library",{f:status});
   } catch(error) {
    setFeedback({error:true,message:error.message});
@@ -82,10 +85,17 @@ export default function CatalogLibrary({userId,go,filter}){
   {result?.error&&<p className="note" role="alert">No pudimos cargar tu biblioteca.</p>}
   {result?.entries&&visible.length===0&&<p className="note">No hay libros en «{labels[filter]}».</p>}
   {feedback&&<p className="note" role={feedback.error?"alert":"status"}>{feedback.message}</p>}
+  {feedback?.review&&<div>
+   <button className="chip" onClick={()=>go("catalogBook",{
+    id:feedback.review.id,from:"library",libraryFilter:"terminado",
+    finishedOn:feedback.review.date,reviewEntryId:feedback.review.entryId,openReview:true,
+   })}>Escribir reseña</button>
+   <button className="chip" onClick={()=>setFeedback(null)}>Ahora no</button>
+  </div>}
   {visible.map(entry=><article className="catalog-library-card" key={entry.id}>
    <div className="catalog-library-row">
     <button className="catalog-library-book"
-    disabled={saving} onClick={()=>go("catalogBook",{id:entry.book.id,from:"library",libraryFilter:filter,finishedOn:entry.finishedOn})}>
+    disabled={saving} onClick={()=>go("catalogBook",{id:entry.book.id,from:"library",libraryFilter:filter,finishedOn:entry.finishedOn,reviewEntryId:entry.status==="terminado"?entry.id:null})}>
     <Cover b={entry.book} cls="mini"/>
     <div><b>{entry.book.t}</b>{entry.book.a&&<div className="muted">{entry.book.a}</div>}
     {entry.format&&<div className="muted">Formato · {entry.format}</div>}</div>

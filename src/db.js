@@ -30,3 +30,5 @@ export const listCatalogLibrary = real.listCatalogLibrary;
 export const addCatalogBook = real.addCatalogBook;
 export const abandonCatalogReading = real.abandonCatalogReading;
 export const changeCatalogReadingStatus = real.changeCatalogReadingStatus;
+export const getCatalogReview = real.getCatalogReview;
+export const saveCatalogReview = real.saveCatalogReview;

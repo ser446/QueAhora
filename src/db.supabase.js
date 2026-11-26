@@ -258,3 +258,21 @@ export async function changeCatalogReadingStatus(entryId, readingId, currentStat
   if (error) fail(error, "No pudimos cambiar el estado de la lectura.");
   return data;
 }
+
+export async function getCatalogReview(entryId) {
+  const {data, error} = await supabase.rpc("obtener_resena_biblioteca", {
+    p_biblioteca_id: entryId,
+  }).maybeSingle();
+  if (error) fail(error, "No pudimos cargar tu reseña.");
+  return data;
+}
+
+export async function saveCatalogReview(entryId, review) {
+  const {error} = await supabase.rpc("guardar_resena_biblioteca", {
+    p_biblioteca_id: entryId,
+    p_contenido: review.contenido,
+    p_es_publica: review.es_publica,
+    p_contiene_spoilers: review.contiene_spoilers,
+  });
+  if (error) fail(error, "No pudimos guardar tu reseña.");
+}

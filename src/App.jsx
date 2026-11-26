@@ -95,7 +95,7 @@ export default function App(){
     ? <CatalogLibrary key={user.id} userId={user.id} go={go} filter={scr.f||"pendiente"}/>
     : <Library go={go} entries={entries} nextStatus={nextStatus} filter={scr.f||"Leyendo"}/>)}
    {scr.n==="search"&&<Search go={go} q={q} setQ={setQ}/>}
-   {scr.n==="catalogBook"&&<CatalogBook key={scr.id} id={scr.id} readingFinishedOn={scr.finishedOn} inLibrary={scr.from === "library"} user={user} onLogin={()=>go("login")} onBack={()=>go(scr.from||"search",scr.from==="library"?{f:scr.libraryFilter}:{})}/>}
+   {scr.n==="catalogBook"&&<CatalogBook key={scr.id} id={scr.id} readingFinishedOn={scr.finishedOn} reviewEntryId={scr.reviewEntryId} openReview={scr.openReview} inLibrary={scr.from === "library"} user={user} onLogin={()=>go("login")} onBack={()=>go(scr.from||"search",scr.from==="library"?{f:scr.libraryFilter}:{})}/>}
    {scr.n==="book"&&<Book id={scr.id} go={go} add={add} entries={entries} user={user}/>}
    {scr.n==="log"&&user&&<Log key={scr.entryId} entry={entries.find(e=>e.id===scr.entryId)} upd={upd} go={go} toast={setToast}/>}
    {scr.n==="add"&&user&&<AddBook addBook={addBook}/>}

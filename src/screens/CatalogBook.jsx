@@ -1,5 +1,6 @@
 import {useEffect,useState} from "react";
 import {addCatalogBook,getCatalogBook} from "../db.js";
+import CatalogReview from "./CatalogReview.jsx";
 import {Cover} from "../ui.jsx";
 
 const readingStates={
@@ -14,7 +15,7 @@ const editionFields=[
  ["isbn_13","ISBN-13"],["isbn_10","ISBN-10"],
 ];
 
-export default function CatalogBook({id,onBack,user,onLogin,readingFinishedOn,inLibrary}){
+export default function CatalogBook({id,onBack,user,onLogin,readingFinishedOn,inLibrary,reviewEntryId,openReview}){
  const [result,setResult]=useState(null);
  useEffect(()=>{
   let active=true;
@@ -93,6 +94,7 @@ export default function CatalogBook({id,onBack,user,onLogin,readingFinishedOn,in
     {user?"Agregar a mi biblioteca":"Ingresá para guardar el libro"}
    </button>}
    {feedback&&<p className="note" role={feedback.saved?"status":"alert"}>{feedback.message}</p>}
+   {user&&reviewEntryId&&<CatalogReview key={user.id+":"+reviewEntryId} entryId={reviewEntryId} openOnLoad={openReview}/>}
    <h4 className="section">Ediciones</h4>
    {!book.editions.length&&<p className="note">Todavía no hay ediciones cargadas.</p>}
    {book.editions.map(edition=>{

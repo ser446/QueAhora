@@ -246,3 +246,15 @@ export async function moderate(id, ok, reason) {
   const {error} = await supabase.rpc("moderate_review", {p_id: id, p_ok: ok, p_reason: reason || null});
   if (error) fail(error, "No pudimos moderar la reseña.");
 }
+
+export async function changeCatalogReadingStatus(entryId, readingId, currentStatus, status, finishedOn) {
+  const {data, error} = await supabase.rpc("cambiar_estado_lectura", {
+    p_biblioteca_id: entryId,
+    p_lectura_id: readingId ?? null,
+    p_estado_actual: currentStatus,
+    p_estado_nuevo: status,
+    p_fecha_fin: finishedOn,
+  });
+  if (error) fail(error, "No pudimos cambiar el estado de la lectura.");
+  return data;
+}

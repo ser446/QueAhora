@@ -53,3 +53,44 @@ body{margin:0;background:var(--page);font-family:system-ui,-apple-system,"Segoe 
 .err{color:var(--err);font-size:12px;margin:10px 0 0}
 .pw{position:relative}.pw .field{padding-right:86px}
 .pw .link{position:absolute;right:10px;top:50%;transform:translateY(-50%);padding:4px}
+
+.catalog-library-card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 10px;
+  margin: 10px 0;
+}
+.catalog-library-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 6px;
+}
+.catalog-library-book {
+  display: flex;
+  flex: 1 1 150px;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.catalog-library-row > .chip {
+  min-height: 44px;
+  margin: 0;
+}
+@media (max-width: 325px) {
+  .catalog-library-book {
+    flex-basis: 100%;
+  }
+  .catalog-library-row > :last-child {
+    margin-inline-start: 66px;
+  }
+}

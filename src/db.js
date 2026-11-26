@@ -29,3 +29,4 @@ export const getCatalogBook = real.getCatalogBook;
 export const listCatalogLibrary = real.listCatalogLibrary;
 export const addCatalogBook = real.addCatalogBook;
 export const abandonCatalogReading = real.abandonCatalogReading;
+export const changeCatalogReadingStatus = real.changeCatalogReadingStatus;

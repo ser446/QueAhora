@@ -123,9 +123,20 @@ export async function getCatalogBook(id) {
   };
 }
 
+export async function addCatalogBook(bookId, editionId, status, finishedOn) {
+  const {data, error} = await supabase.rpc("agregar_libro_biblioteca", {
+    p_obra_id: bookId,
+    p_edicion_id: editionId,
+    p_estado: status,
+    p_fecha_fin: finishedOn,
+  });
+  if (error) fail(error, "No pudimos agregar este libro a tu biblioteca.");
+  return data;
+}
+
 export async function listCatalogLibrary(userId) {
   const {data, error} = await supabase.from("biblioteca_usuario")
-    .select("id, obras(" + catalogColumns + "), ediciones!biblioteca_edicion_obra_correcta(formato, tapa_ruta), lecturas(id, estado, creado_en)")
+    .select("id, obras(" + catalogColumns + "), ediciones!biblioteca_edicion_obra_correcta(formato, tapa_ruta), lecturas(id, estado, fecha_fin, creado_en)")
     .eq("usuario_id", userId)
     .order("agregado_en", {ascending: false})
     .order("id")
@@ -141,6 +152,7 @@ export async function listCatalogLibrary(userId) {
 },
     format: entry.ediciones?.formato,
     status: entry.lecturas?.[0]?.estado ?? "pendiente",
+    finishedOn: entry.lecturas?.[0]?.fecha_fin,
   }));
 }
 

@@ -25,9 +25,9 @@ export default function CatalogLibrary({userId,go,filter}){
   {!result&&<p className="note" role="status">Cargando tu biblioteca…</p>}
   {result?.error&&<p className="note" role="alert">No pudimos cargar tu biblioteca.</p>}
   {result?.entries&&visible.length===0&&<p className="note">No hay libros en «{labels[filter]}».</p>}
-  {visible.map(({id,book,format})=><button key={id} className="listbook"
+  {visible.map(({id,book,format,finishedOn})=><button key={id} className="listbook"
    style={{width:"100%",border:0,textAlign:"left",color:"inherit",font:"inherit",cursor:"pointer"}}
-   onClick={()=>go("catalogBook",{id:book.id,from:"library",libraryFilter:filter})}>
+   onClick={()=>go("catalogBook",{id:book.id,from:"library",libraryFilter:filter,finishedOn:filter==="terminado"?finishedOn:null})}>
    <Cover b={book} cls="mini"/>
    <div><b>{book.t}</b>{book.a&&<div className="muted">{book.a}</div>}
    {format&&<div className="muted">Formato · {format}</div>}</div>

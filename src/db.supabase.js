@@ -152,10 +152,18 @@ export async function listCatalogLibrary(userId) {
 },
     format: entry.ediciones?.formato,
     status: entry.lecturas?.[0]?.estado ?? "pendiente",
-    finishedOn: entry.lecturas?.[0]?.fecha_fin,
+    readingId: entry.lecturas?.[0]?.id,
+    finishedOn: entry.lecturas?.[0]?.fecha_fin, 
   }));
 }
 
+export async function abandonCatalogReading(readingId) {
+  const {data, error} = await supabase.rpc("abandonar_lectura", {
+    p_lectura_id: readingId,
+  });
+  if (error) fail(error, "No pudimos cambiar el estado de la lectura.");
+  return data;
+}
 export async function listBooks() {
   const {data, error} = await supabase.rpc("books_with_stats");
   if (error) fail(error, "No pudimos cargar los libros.");

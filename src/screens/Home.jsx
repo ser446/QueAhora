@@ -1,8 +1,33 @@
 import {useEffect,useState} from "react";
-import {listFeaturedBooks} from "../db.js";
+import {listCatalogLibrary,listFeaturedBooks} from "../db.js";
 import {isConfigured} from "../supabase.js";
 import {bk,fmt} from "../data.js";
 import {Cover} from "../ui.jsx";
+
+function CatalogCurrentReading({userId,go}){
+ const [result,setResult]=useState(null);
+ useEffect(()=>{
+  let active=true;
+  listCatalogLibrary(userId).then(
+   entries=>{if(active)setResult({reading:entries.find(entry=>entry.status==="leyendo")})},
+   ()=>{if(active)setResult({error:true})},
+  );
+  return ()=>{active=false};
+ },[userId]);
+
+ if(!result)return <p className="note" role="status">Cargando tu lectura actual…</p>;
+ if(result.error)return <p className="note" role="alert">No pudimos cargar tu lectura actual.</p>;
+ if(!result.reading)return <p className="note">No tenés libros en Leyendo.</p>;
+ const {book,format}=result.reading;
+ return <div className="listbook">
+  <Cover b={book} cls="mini"/>
+  <div>
+   <b>{book.t}</b>
+   <div className="muted">{[book.a,format].filter(Boolean).join(" · ")}</div>
+   <button className="chip" onClick={()=>go("library",{f:"leyendo"})}>Ver mi biblioteca</button>
+  </div>
+ </div>;
+}
 
 export default function Home({go,user,entries,points,nRead,q,setQ}){
  const [catalog,setCatalog]=useState({books:[],loading:true,error:false});
@@ -29,7 +54,7 @@ export default function Home({go,user,entries,points,nRead,q,setQ}){
   })}</div>
   {user?<>
    <div className="section">Tu lectura actual</div>
-   {cur?<div className="listbook"><Cover b={bk(cur.bookId)} cls="mini"/><div><b>{bk(cur.bookId).t}</b><div className="muted">Leyendo · formato {cur.formats.join(", ").toLowerCase()}</div><button className="chip" onClick={()=>go("library")}>Ver mi biblioteca</button></div></div>
+   {isConfigured?<CatalogCurrentReading key={user.id} userId={user.id} go={go}/>:cur?<div className="listbook"><Cover b={bk(cur.bookId)} cls="mini"/><div><b>{bk(cur.bookId).t}</b><div className="muted">Leyendo · formato {cur.formats.join(", ").toLowerCase()}</div><button className="chip" onClick={()=>go("library")}>Ver mi biblioteca</button></div></div>
     :<p className="note">Todavía no empezaste ningún libro. Elegí uno en Buscar.</p>}
    <div className="section">Tus puntos</div>
    <div className="row"><div className="stat"><strong>{points}</strong><span className="muted">Puntos acumulados</span></div><div className="stat"><strong>{nRead}</strong><span className="muted">Libros leídos</span></div></div>

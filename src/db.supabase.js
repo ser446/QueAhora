@@ -306,3 +306,11 @@ export async function listLatestLibraryImports() {
   if (error) fail(error, "No pudimos cargar tus importaciones.");
   return data;
 }
+
+export async function listLibraryImportReviewRows(importId) {
+  const {data, error} = await supabase.rpc("listar_filas_para_revisar", {
+    p_importacion_id: importId,
+  });
+  if (error) fail(error, "No pudimos cargar las filas para revisar.");
+  return data;
+}

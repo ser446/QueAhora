@@ -36,3 +36,4 @@ export const listPublicCatalogReviews = real.listPublicCatalogReviews;
 export const registerLibraryImport = real.registerLibraryImport;
 export const processLatestLibraryImport = real.processLatestLibraryImport;
 export const listLatestLibraryImports = real.listLatestLibraryImports;
+export const listLibraryImportReviewRows = real.listLibraryImportReviewRows;

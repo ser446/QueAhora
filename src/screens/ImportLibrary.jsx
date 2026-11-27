@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from "react";
-import {listLatestLibraryImports,processLatestLibraryImport,registerLibraryImport} from "../db.js";
+import {listLatestLibraryImports,listLibraryImportReviewRows,processLatestLibraryImport,registerLibraryImport} from "../db.js";
 import {parseLibraryCsv} from "../importCsv.js";
 
 function newImportId(){
@@ -10,6 +10,26 @@ function newImportId(){
  return [hex.slice(0,8),hex.slice(8,12),hex.slice(12,16),hex.slice(16,20),hex.slice(20)].join("-");
 }
 
+function ImportReviewRows({importId}){
+ const [result,setResult]=useState(null);
+ useEffect(()=>{
+  let active=true;
+  listLibraryImportReviewRows(importId).then(
+   rows=>{if(active)setResult({rows})},
+   ()=>{if(active)setResult({error:true})},
+  );
+  return ()=>{active=false};
+ },[importId]);
+
+ if(!result)return <p className="note" role="status">Cargando filas para revisar…</p>;
+ if(result.error)return <p className="note" role="alert">No pudimos cargar el detalle. Cerralo y volvé a abrirlo.</p>;
+ if(!result.rows.length)return <p className="note">No hay filas marcadas para revisión.</p>;
+ return <ul>{result.rows.map(row=><li key={row.numero_fila}>
+  <b>{row.titulo_original||"Sin título"}</b>{row.autor_original&&" · "+row.autor_original}
+  <div className="note">Registro {row.numero_fila} · {row.motivo||"Requiere revisión."}</div>
+ </li>)}</ul>;
+}
+
 export default function ImportLibrary({go}){
  const [preview,setPreview]=useState(null);
  const [error,setError]=useState("");
@@ -17,6 +37,7 @@ export default function ImportLibrary({go}){
  const [saved,setSaved]=useState(false);
  const [imports,setImports]=useState(null);
  const [revision,setRevision]=useState(0);
+ const [openReviewId,setOpenReviewId]=useState(null);
  const working=useRef(false);
 
  useEffect(()=>{
@@ -111,6 +132,13 @@ export default function ImportLibrary({go}){
      Incorporados: {lot.libros_incorporados} · Duplicados: {lot.duplicados_detectados}
      {" · "}Para revisar: {lot.pendientes_revision} · Errores: {lot.errores}
     </p>}
+   {!lot.por_procesar&&lot.pendientes_revision>0&&<>
+    <button className="chip" aria-expanded={openReviewId===lot.id}
+     onClick={()=>setOpenReviewId(openReviewId===lot.id?null:lot.id)}>
+     {openReviewId===lot.id?"Ocultar filas para revisar":"Ver filas para revisar"}
+    </button>
+    {openReviewId===lot.id&&<ImportReviewRows key={lot.id} importId={lot.id}/>}
+   </>}
   </article>)}
  </>;
 }

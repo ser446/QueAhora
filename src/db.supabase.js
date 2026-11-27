@@ -294,3 +294,15 @@ export async function registerLibraryImport(id, origin, records) {
   if (error) fail(error, "No pudimos guardar el archivo.");
   return data;
 }
+
+export async function processLatestLibraryImport(origin) {
+  const {data, error} = await supabase.rpc("procesar_ultima_importacion", {p_origen: origin});
+  if (error) fail(error, "No pudimos procesar la importación.");
+  return data;
+}
+
+export async function listLatestLibraryImports() {
+  const {data, error} = await supabase.rpc("listar_ultimas_importaciones");
+  if (error) fail(error, "No pudimos cargar tus importaciones.");
+  return data;
+}

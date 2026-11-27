@@ -1,5 +1,5 @@
-import {useRef,useState} from "react";
-import {registerLibraryImport} from "../db.js";
+import {useEffect,useRef,useState} from "react";
+import {listLatestLibraryImports,processLatestLibraryImport,registerLibraryImport} from "../db.js";
 import {parseLibraryCsv} from "../importCsv.js";
 
 function newImportId(){
@@ -15,7 +15,23 @@ export default function ImportLibrary({go}){
  const [error,setError]=useState("");
  const [busy,setBusy]=useState(false);
  const [saved,setSaved]=useState(false);
+ const [imports,setImports]=useState(null);
+ const [revision,setRevision]=useState(0);
  const working=useRef(false);
+
+ useEffect(()=>{
+  let active=true;
+  listLatestLibraryImports().then(
+   lots=>{if(active)setImports({lots})},
+   ()=>{if(active)setImports({error:true})},
+  );
+  return ()=>{active=false};
+ },[revision]);
+
+ const refreshImports=()=>{
+  setImports(null);
+  setRevision(value=>value+1);
+ };
 
  const load=async event=>{
   const file=event.target.files?.[0];
@@ -45,6 +61,23 @@ export default function ImportLibrary({go}){
   try {
    await registerLibraryImport(preview.id,preview.origin,preview.records);
    setSaved(true);
+   refreshImports();
+  } catch(error) {
+   setError(error.message);
+  } finally {
+   working.current=false;
+   setBusy(false);
+  }
+ };
+
+ const process=async origin=>{
+  if(working.current)return;
+  working.current=true;
+  setBusy(true);
+  setError("");
+  try {
+   await processLatestLibraryImport(origin);
+   refreshImports();
   } catch(error) {
    setError(error.message);
   } finally {
@@ -63,8 +96,21 @@ export default function ImportLibrary({go}){
   {preview&&<>
    <h3>{preview.origin==="goodreads"?"Goodreads":"Bookmory"} · {preview.records.length} filas</h3>
    <ul>{preview.records.slice(0,5).map(({titulo,autor},index)=><li key={index}>{titulo||"Sin título"}{autor&&" · "+autor}</li>)}</ul>
-   {saved?<p role="status">Archivo registrado. Las filas quedaron pendientes de procesar.</p>
+   {saved?<p role="status">Archivo registrado.</p>
     :<button className="btn" disabled={busy} onClick={confirm}>{busy?"Guardando…":"Confirmar importación"}</button>}
   </>}
+  <h3 className="section">Últimos archivos guardados</h3>
+  {!imports&&<p className="note" role="status">Cargando importaciones…</p>}
+  {imports?.error&&<p className="note" role="alert">No pudimos cargar tus importaciones.</p>}
+  {imports?.lots?.length===0&&<p className="note">Todavía no guardaste ningún archivo.</p>}
+  {imports?.lots?.map(lot=><article className="review" key={lot.id}>
+   <b>{lot.origen==="goodreads"?"Goodreads":"Bookmory"} · {lot.registros_analizados} filas</b>
+   {lot.por_procesar
+    ? <div><button className="chip" disabled={busy} onClick={()=>process(lot.origen)}>Procesar</button></div>
+    : <p className="note">
+     Incorporados: {lot.libros_incorporados} · Duplicados: {lot.duplicados_detectados}
+     {" · "}Para revisar: {lot.pendientes_revision} · Errores: {lot.errores}
+    </p>}
+  </article>)}
  </>;
 }

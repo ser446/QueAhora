@@ -1,9 +1,11 @@
 import {useEffect,useState} from "react";
 import {getCatalogReview,saveCatalogReview} from "../db.js";
 
+const minimumWords=20;
+const countWords=text=>text.match(/\p{L}+/gu)?.length??0;
 const emptyReview={contenido:"",es_publica:true,contiene_spoilers:false};
 
-export default function CatalogReview({entryId,openOnLoad}){
+export default function CatalogReview({entryId,openOnLoad,onSaved}){
  const [result,setResult]=useState(null);
  const [draft,setDraft]=useState(null);
  const [saving,setSaving]=useState(false);
@@ -22,14 +24,17 @@ export default function CatalogReview({entryId,openOnLoad}){
   return ()=>{active=false};
  },[entryId,openOnLoad]);
 
+ const wordCount=countWords(draft?.contenido??"");
+
  const save=async event=>{
   event.preventDefault();
   const review={...draft,contenido:draft.contenido.trim()};
-  if(saving||!review.contenido)return;
+  if(saving||wordCount<minimumWords)return;
   setSaving(true);
   setFeedback(null);
   try {
    await saveCatalogReview(entryId,review);
+   onSaved();
    setResult({review});
    setDraft(null);
    setFeedback({message:"Reseña guardada."});
@@ -49,6 +54,7 @@ export default function CatalogReview({entryId,openOnLoad}){
     <textarea className="field" rows={5} required value={draft.contenido} disabled={saving}
      onChange={event=>setDraft({...draft,contenido:event.target.value})}/>
    </label>
+   <p className="note">{wordCount} de {minimumWords} palabras mínimas</p>
    <div><label>
     <input type="checkbox" checked={draft.es_publica} disabled={saving}
      onChange={event=>setDraft({...draft,es_publica:event.target.checked})}/>
@@ -59,7 +65,7 @@ export default function CatalogReview({entryId,openOnLoad}){
      onChange={event=>setDraft({...draft,contiene_spoilers:event.target.checked})}/>
     Contiene spoilers
    </label></div>
-   <button className="btn" type="submit" disabled={saving||!draft.contenido.trim()}>
+   <button className="btn" type="submit" disabled={saving||wordCount<minimumWords}>
     {saving?"Guardando…":"Guardar reseña"}
    </button>
    <button className="chip" type="button" disabled={saving}

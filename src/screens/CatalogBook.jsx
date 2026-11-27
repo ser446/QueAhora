@@ -1,5 +1,6 @@
 import {useEffect,useState} from "react";
 import {addCatalogBook,getCatalogBook} from "../db.js";
+import CatalogPublicReviews from "./CatalogPublicReviews.jsx";
 import CatalogReview from "./CatalogReview.jsx";
 import {Cover} from "../ui.jsx";
 
@@ -17,6 +18,7 @@ const editionFields=[
 
 export default function CatalogBook({id,onBack,user,onLogin,readingFinishedOn,inLibrary,reviewEntryId,openReview}){
  const [result,setResult]=useState(null);
+ const [reviewRevision,setReviewRevision]=useState(0);
  useEffect(()=>{
   let active=true;
   getCatalogBook(id).then(
@@ -94,7 +96,8 @@ export default function CatalogBook({id,onBack,user,onLogin,readingFinishedOn,in
     {user?"Agregar a mi biblioteca":"Ingresá para guardar el libro"}
    </button>}
    {feedback&&<p className="note" role={feedback.saved?"status":"alert"}>{feedback.message}</p>}
-   {user&&reviewEntryId&&<CatalogReview key={user.id+":"+reviewEntryId} entryId={reviewEntryId} openOnLoad={openReview}/>}
+   {user&&reviewEntryId&&<CatalogReview key={user.id+":"+reviewEntryId} entryId={reviewEntryId} openOnLoad={openReview}
+     onSaved={()=>setReviewRevision(value=>value+1)}/>}
    <h4 className="section">Ediciones</h4>
    {!book.editions.length&&<p className="note">Todavía no hay ediciones cargadas.</p>}
    {book.editions.map(edition=>{
@@ -106,6 +109,7 @@ export default function CatalogBook({id,onBack,user,onLogin,readingFinishedOn,in
      ):<p className="note">Edición sin datos adicionales.</p>}</div>
     </article>;
    })}
+   <CatalogPublicReviews key={id+":"+reviewRevision} bookId={id}/>
   </>}
  </>;
 }

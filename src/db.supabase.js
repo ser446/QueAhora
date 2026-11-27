@@ -276,3 +276,11 @@ export async function saveCatalogReview(entryId, review) {
   });
   if (error) fail(error, "No pudimos guardar tu reseña.");
 }
+
+export async function listPublicCatalogReviews(bookId) {
+  const {data, error} = await supabase.rpc("listar_resenas_publicas", {
+    p_obra_id: bookId,
+  });
+  if (error) fail(error, "No pudimos cargar las reseñas públicas.");
+  return data;
+}

@@ -127,5 +127,6 @@ export default function CatalogLibrary({userId,go,filter}){
    </form>}
   </article>)}
   <button className="btn" disabled={saving} onClick={()=>go("search")}>Buscar libros</button>
+  <button className="chip" disabled={saving} onClick={()=>go("importLibrary")}>Importar biblioteca</button>
  </>;
 }

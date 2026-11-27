@@ -284,3 +284,13 @@ export async function listPublicCatalogReviews(bookId) {
   if (error) fail(error, "No pudimos cargar las reseñas públicas.");
   return data;
 }
+
+export async function registerLibraryImport(id, origin, records) {
+  const {data, error} = await supabase.rpc("registrar_importacion_biblioteca", {
+    p_lote_id: id,
+    p_origen: origin,
+    p_filas: records,
+  });
+  if (error) fail(error, "No pudimos guardar el archivo.");
+  return data;
+}

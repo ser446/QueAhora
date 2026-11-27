@@ -6,6 +6,7 @@ import Auth from "./screens/Auth.jsx";
 import ProfileForm from "./screens/ProfileForm.jsx";
 import Home from "./screens/Home.jsx";
 import Library from "./screens/Library.jsx";
+import ImportLibrary from "./screens/ImportLibrary.jsx";
 import CatalogLibrary from "./screens/CatalogLibrary.jsx";
 import {isConfigured} from "./supabase.js";
 import Search from "./screens/Search.jsx";
@@ -17,7 +18,7 @@ import AddBook from "./screens/AddBook.jsx";
 import Moderation from "./screens/Moderation.jsx";
 
 // Pantallas que requieren haber ingresado (si no, se muestra Login)
-const PRIVATE=["library","log","add","edit"];
+const PRIVATE=["library","importLibrary","log","add","edit"];
 
 export default function App(){
  const [user,setUser]=useState(null);       // {id,email,provider} o null (invitado)
@@ -82,8 +83,8 @@ export default function App(){
  const nextStatus=async e=>{const s=ST[(ST.indexOf(e.status)+1)%3];try{await upd(e.id,{status:s});say("Ahora: "+s)}catch(x){fail(x)}};
  const addBook=async b=>{try{const nb=await db.addBook(user.id,b);setBooks(bs=>[...bs,nb]);say("Libro cargado");go("book",{id:nb.id})}catch(x){fail(x)}};
 
- const heads={catalogBook:["Ficha del libro",""],home:["¿Qué leemos hoy?","Descubrí tu próxima historia"],library:["Mi biblioteca","Organizá tus lecturas"],search:["Buscar","Título, autor o ISBN"],book:["Ficha del libro","Conocé la historia y las opiniones"],log:["Registrar lectura","Guardá tu experiencia"],add:["Cargar un libro","Sumalo al catálogo compartido"],mod:["Moderación","Reseñas pendientes de aprobación"],edit:["Editar perfil","Tus datos personales y tu ubicación"],profile:["Mi perfil","Tu recorrido como lector"],login:["Login","Ingresá a tu cuenta"],register:["Crear usuario","Sumate a QuéAhora?"]}[scr.n]||["QuéAhora?",""];
- const tab=scr.n==="catalogBook"?(scr.from||"search"):["home","library","search","mod"].includes(scr.n)?scr.n:(scr.n==="book"||scr.n==="add")?"search":scr.n==="log"?"library":["profile","edit","login","register"].includes(scr.n)?"profile":"home";
+ const heads={importLibrary:["Importar biblioteca","Goodreads y Bookmory"],catalogBook:["Ficha del libro",""],home:["¿Qué leemos hoy?","Descubrí tu próxima historia"],library:["Mi biblioteca","Organizá tus lecturas"],search:["Buscar","Título, autor o ISBN"],book:["Ficha del libro","Conocé la historia y las opiniones"],log:["Registrar lectura","Guardá tu experiencia"],add:["Cargar un libro","Sumalo al catálogo compartido"],mod:["Moderación","Reseñas pendientes de aprobación"],edit:["Editar perfil","Tus datos personales y tu ubicación"],profile:["Mi perfil","Tu recorrido como lector"],login:["Login","Ingresá a tu cuenta"],register:["Crear usuario","Sumate a QuéAhora?"]}[scr.n]||["QuéAhora?",""];
+ const tab=scr.n==="catalogBook"?(scr.from||"search"):["home","library","search","mod"].includes(scr.n)?scr.n:(scr.n==="book"||scr.n==="add")?"search":["log","importLibrary"].includes(scr.n)?"library":["profile","edit","login","register"].includes(scr.n)?"profile":"home";
  const tabs=[["home","⌂","Inicio"],["library","▤","Biblioteca"],["search","⌕","Buscar"],["profile",user?"◯":"→",user?"Perfil":"Login"],...(isAdmin?[["mod","✓","Moderar"]]:[])];
 
  if(!ready)return <div className="phone"><div className="top"><small>QuéAhora? 📚</small><h2>Cargando…</h2></div></div>;
@@ -94,6 +95,7 @@ export default function App(){
    {scr.n==="library"&&user&&(isConfigured
     ? <CatalogLibrary key={user.id} userId={user.id} go={go} filter={scr.f||"pendiente"}/>
     : <Library go={go} entries={entries} nextStatus={nextStatus} filter={scr.f||"Leyendo"}/>)}
+   {scr.n==="importLibrary"&&user&&isConfigured&&<ImportLibrary key={user.id} go={go}/>}
    {scr.n==="search"&&<Search go={go} q={q} setQ={setQ}/>}
    {scr.n==="catalogBook"&&<CatalogBook key={scr.id} id={scr.id} readingFinishedOn={scr.finishedOn} reviewEntryId={scr.reviewEntryId} openReview={scr.openReview} inLibrary={scr.from === "library"} user={user} onLogin={()=>go("login")} onBack={()=>go(scr.from||"search",scr.from==="library"?{f:scr.libraryFilter}:{})}/>}
    {scr.n==="book"&&<Book id={scr.id} go={go} add={add} entries={entries} user={user}/>}
